@@ -1,0 +1,90 @@
+{% extends "base.html"%}
+
+{% block head %}
+{{super()}}
+<link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='datatables-1.10.24/css/dataTables.bootstrap4.min.css')}}">
+<script type="text/javascript" charset="utf8" src="{{url_for('static', filename='datatables-1.10.24/js/jquery.dataTables.min.js')}}"></script>
+<script type="text/javascript" charset="utf8" src="{{url_for('static', filename='datatables-1.10.24/js/dataTables.bootstrap4.min.js')}}"></script>
+{% endblock %}
+
+{% block app_content %}
+<div class="row">
+    <div class="col">
+        <div class="spinner-border text-info" role="status" style="display: None">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+
+    <div class="col-11">
+        <table id="ppp_table" class="table">
+        <thead class="thead-dark">
+            <tr bgcolor='#D8D8D8'>
+                <th>БС ID</th>
+                <th>Состояние</th>
+                <th>IP</th>
+                <th>RS1 web</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in view_data %}
+                <tr  data-code="{{item['code']}}">
+                    <td class="code">
+                        <a href="{{url_for('core.basestation', bs_id=item['id'])}}">{{item['code']}}
+                            {% if item['problems_count'] > 0 %}
+                                <span class="badge rounded-pill bg-danger">{{item['problems_count']}}</span></a>
+                            {% endif %}
+                    </td>
+
+                    <td class="state">
+                        {% if item.get('is_active') %}
+                            <img width="24" src="{{url_for('static', filename='images/ok.png')}}">
+                        {% else %}
+                        <p class="d-none">inactive</p>
+                            <img class="d-none" width="24" src="{{url_for('static', filename='images/ok.png')}}">
+                        {% endif %}
+                    </td>
+                    <td>{{item['ip']}}</td>
+                    <td><a href="http://{{item['ip']}}:8801" target="_blank">{{item['ip']}}:8801</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script type="text/javascript" language="JavaScript">
+        $(document).ready( function () {
+            $('#ppp_table').DataTable();
+
+            setInterval(function(){
+                $('.spinner-border').show();
+
+                $.ajax({
+                    method: "GET",
+                    url: "{{url_for('core.active_secrets')}}",
+                })
+                .done(function(data, status) {
+                    $.each($("tr[data-code]"), function(ind, value){
+                        var state_img = $(value).find('.state > img')
+                        if (data.includes(value.dataset.code)) {
+                            if (state_img.hasClass('d-none')){
+                                 state_img.removeClass('d-none');
+                            };
+                        } else {
+                            if (!state_img.hasClass('d-none')) {
+                                 state_img.addClass('d-none');
+                            };
+                        };
+                    $('.spinner-border').hide();
+                });
+            });
+            }, 30000);
+        } );
+
+    </script>
+{% endblock %}

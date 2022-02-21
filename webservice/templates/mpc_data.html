@@ -1,0 +1,98 @@
+{% extends "base.html"%}
+
+{% block head %}
+    {{super()}}
+    <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='datatables-1.10.24/css/dataTables.bootstrap4.css')}}">
+
+    <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='datatables-1.10.24/js/jquery.dataTables.js')}}"></script>
+    <script type="text/javascript" charset="utf8" src="{{url_for('static', filename='datatables-1.10.24/js/dataTables.bootstrap4.js')}}"></script>
+{% endblock %}
+
+{% block app_content %}
+    <h3>Сводные данные</h3>
+    <div class="row mb-4">
+        <div class="col">
+            <h6>Версии Python3</h6>
+            <ul class="list-group">
+                {% for key, value in view_data['py3_stat'].items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ key }}
+                    <span class="badge badge-primary badge-light">{{ value }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col">
+            <h6>Версии библиотеки Glib</h6>
+            <ul class="list-group">
+                {% for key, value in view_data['glib_stat'].items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ key }}
+                    <span class="badge badge-primary badge-light">{{ value }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="col">
+            <h6>Обновления микрокомпьютера</h6>
+            <ul class="list-group">
+                {% for key, value in view_data['update_stat'].items() %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ key }}
+                    <span class="badge badge-primary badge-light">{{ value }}</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <h3>Список БС</h3>
+    <table id="mpc_data_table" class="table">
+        <thead>
+            <tr>
+                <th>БС ID</th>
+                <th>Версия Python3</th>
+                <th>Версия библиотеки Glib</th>
+                <th>Последнее обновление</th>
+                <th>Загрузка с USB</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for id, data in view_data['data'].items() %}
+                <tr  data-code="{{ data['code'] }}">
+                    <td class="code">
+                        <a href="{{url_for('core.basestation', bs_id=id)}}">{{ data['code'] }}</a>
+                    </td>
+                    <td class="py3">
+                        <span>{{ data['py_ver'] }}</span>
+                    </td>
+                    <td class="glib">
+                        <span>{{ data['glib_ver'] }}</span>
+                    </td>
+                    <td class="updates">
+                        <span>{{ data['is_mpc_updated'] }}</span>
+                    </td>
+                    <td colspan="usb-boot">
+                        {% if data['is_usb_boot'] is none %}
+                            <span class="ml-2">-</span>
+                        {% elif data['is_usb_boot'] %}
+                            <span class="ml-2" style="color: transparent;">yes<img width="24" src="{{url_for('static', filename='images/switch_on.png')}}"></span>
+                        {% else %}
+                            <span class="ml-2" style="color: transparent;">no<img width="24" src="{{url_for('static', filename='images/switch_off.png')}}"></span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript" language="JavaScript">
+        $(document).ready( function () {
+            $('#mpc_data_table').DataTable();
+        });
+    </script>
+{% endblock %}

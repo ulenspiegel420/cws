@@ -1,0 +1,74 @@
+{% extends "base.html"%}
+
+{% block app_content %}
+<div class="d-flex flex-row my-1 border-bottom">
+    <div>
+        <h1>БС {{view_data['code']}}</h1>
+    </div>
+    <div class="flex-grow-1">
+            <ul class="d-flex list-inline justify-content-center">
+                <li class="list-inline-item">
+                    {% if view_data['is_active']%}
+                    <p class="m-0"><span class="badge badge-success">В сети</span> {{view_data['uptime']}}</p>
+                    {% else %}
+                    <span class="badge badge-danger">Не в сети</span>
+                    {% endif %}
+                </li>
+                {% if view_data['is_disabled']%}
+                <li class="list-inline-item"><span class="badge badge-info">ВПН отключен</span></li>
+                {% endif %}
+                <li class="list-inline-item"><p class="m-0">Последнее отключение <span class="badge badge-secondary">{{view_data['last_logout']}}</span></p>
+                </li>
+
+            </ul>
+    </div>
+</div>
+
+<div class="btn-group" role="group" aria-label="Basic example">
+    <a class="btn btn-secondary" href="http://{{view_data['ip']}}:8801" target="_blank" role="button">RS1 web</a>
+    <a class="btn btn-secondary" href="http://{{view_data['ip']}}:80" target="_blank" role="button">Mikrotik</a>
+</div>
+
+<div class="card-group">
+    <div class="card my-3">
+    <div class="card-header">
+        Инфо
+    </div>
+
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">CORS ID: {{view_data['cors_id']}}</li>
+            <li class="list-group-item">IP адрес: {{view_data['ip']}}</li>
+            {% if view_data['is_active'] %}
+                <li class="list-group-item">Тип соединения: {{view_data['service']}}</li>
+                <li class="list-group-item">Шифрование: {{view_data['encoding']}}</li>
+            {% endif %}
+        </ul>
+    </div>
+
+    </div>
+
+{% if view_data['problems']| length > 0 %}
+<div class="card border-danger my-3">
+    <div class="card-header">
+        Список проблем
+    </div>
+  <div class="card-body">
+      <ul class="list-group list-group-flush">
+          {% for problem in view_data['problems'] %}
+          <li class="list-group-item">
+              <p>
+                  <span class="badge bg-secondary">{{problem['ts']}}</span>
+                  <span class="badge bg-danger">{{problem['lvl']|string}}</span>
+                  <span class="badge bg-primary">{{problem['source']}}</span>
+                  {{problem['msg']}}
+              </p>
+          </li>
+          {% endfor %}
+      </ul>
+  </div>
+</div>
+{% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html"%}
+
+{% block app_content %}
+{% macro aaa(problem, class='badge-secondary') -%}
+<div class="d-flex w-100 justify-content-between">
+    <p><span class="badge {{class}}">{{ problem['source'] }}</span>{{ problem['msg'] }}</p>
+    <small>{{ problem['ts'] }} МСК</small>
+</div>
+{%- endmacro %}
+
+<div class="mb-3">
+    <h3>Список текущих проблем</h3>
+    <div class="d-flex">
+        <span class="badge badge-pill bg-info h5 mx-1">Начало проверки: {{ view_data['start_time'] }} МСК</span>
+        <span class="badge badge-pill bg-danger h5 mx-1">Ошибки: {{ view_data['danger_count'] }}</span>
+        <span class="badge badge-pill bg-warning h5 mx-1">Предупреждения: {{view_data['warning_count']}}</span>
+    </div>
+    <div class="d-flex">
+        <span class="badge badge-pill bg-info h5 mx-1">Конец проверки: {{ view_data['end_time'] }} МСК</span>
+    </div>
+</div>
+
+<div class="list-group">
+    {% for id, data in view_data['danger'].items() %}
+    <a href="{{url_for('core.basestation', bs_id=id)}}" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">БС {{data['code']}}</h5>
+        </div>
+        <dl class="row">
+            <dt class="col-sm-2">Проблемы:</dt>
+            <dd class="col-sm-10">
+                {% for problem in data['problems'] %}
+                {{ aaa(problem, class='bg-danger') }}
+                {% endfor %}
+            </dd>
+        </dl>
+    </a>
+    {% endfor %}
+</div>
+
+<div class="list-group">
+    {% for id, data in view_data['warning'].items() %}
+    <a href="{{url_for('core.basestation', bs_id=id)}}" class="list-group-item list-group-item-action">
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">БС {{data['code']}}</h5>
+        </div>
+
+        <dl class="row">
+            <dt class="col-sm-2">Проблемы:</dt>
+                <dd class="col-sm-10">
+                    {% for problem in data['problems'] %}
+                    {{ aaa(problem, class='bg-warning') }}
+                    {% endfor %}
+                </dd>
+        </dl>
+    </a>
+    {% endfor %}
+</div>
+
+{% endblock %}
